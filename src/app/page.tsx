@@ -1,64 +1,163 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { App, AppStatus, STATUS_CONFIG } from "@/lib/types";
+import { getAllApps } from "@/lib/store";
+import { AppCard } from "@/components/AppCard";
+import { PipelineView } from "@/components/PipelineView";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const SUPABASE_CONFIGURED =
+  typeof process !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export default function Dashboard() {
+  const [apps, setApps] = useState<App[]>([]);
+  const [filter, setFilter] = useState<AppStatus | "all">("all");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await getAllApps();
+        if (!cancelled) setApps(list);
+      } catch (e) {
+        console.error("getAllApps failed", e);
+      } finally {
+        setMounted(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <span className="text-sm text-muted-foreground">Loading</span>
+      </div>
+    );
+  }
+
+  const filtered =
+    filter === "all" ? apps : apps.filter((a) => a.status === filter);
+  const inReviewCount = apps.filter((a) => a.status === "in_review").length;
+  const revisionNeededCount = apps.filter(
+    (a) => a.status === "revision_needed"
+  ).length;
+
+  const filterItems: { key: AppStatus | "all"; label: string; count?: number }[] =
+    [
+      { key: "all", label: "All", count: apps.length },
+      ...(Object.keys(STATUS_CONFIG) as AppStatus[]).map((s) => ({
+        key: s,
+        label: STATUS_CONFIG[s].label,
+        count: apps.filter((a) => a.status === s).length,
+      })),
+    ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen">
+      <header className="border-b border-border">
+        <div className="app-shell flex flex-col gap-4 py-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Apps
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {apps.length} total
+              {apps.length > 0 && (
+                <>
+                  {" "}
+                  · {inReviewCount} in review · {revisionNeededCount} revision
+                  needed
+                </>
+              )}
+            </p>
+          </div>
+          <Link href="/apps/new">
+            <Button size="sm" className="h-9 gap-2 rounded-md px-4 font-medium">
+              <Plus className="h-4 w-4" />
+              New app
+            </Button>
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </header>
+
+      <main className="app-shell space-y-6 py-5">
+        {!SUPABASE_CONFIGURED && (
+          <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-400">
+            <strong>Supabase not configured.</strong> Add{" "}
+            <code className="rounded bg-muted px-1 text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code className="rounded bg-muted px-1 text-xs">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{" "}
+            to <code className="rounded bg-muted px-1 text-xs">.env.local</code> and restart the dev server.
+          </div>
+        )}
+
+        <section className="space-y-3">
+          <h2 className="section-title">Pipeline</h2>
+          <PipelineView apps={apps} />
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="section-title">Filter</h2>
+          <nav
+            className="flex flex-wrap gap-x-1 gap-y-1 border-b border-border pb-px"
+            aria-label="Status filters"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            {filterItems.map(({ key, label, count }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilter(key)}
+                className={cn(
+                  "-mb-px border-b-2 px-3 py-2 text-sm transition-colors",
+                  filter === key
+                    ? "border-foreground font-medium text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {label}
+                {count !== undefined && (
+                  <span className="ml-1.5 tabular-nums text-muted-foreground">
+                    {count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+        </section>
+
+        {filtered.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-border py-16 text-center">
+            <p className="text-sm text-muted-foreground">
+              {apps.length === 0
+                ? "No apps yet."
+                : "Nothing matches this filter."}
+            </p>
+            {apps.length === 0 && (
+              <Link href="/apps/new" className="mt-4 inline-block">
+                <Button variant="outline" size="sm" className="rounded-md">
+                  Create an app
+                </Button>
+              </Link>
+            )}
+          </div>
+        ) : (
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {filtered.map((app) => (
+              <li key={app.id}>
+                <AppCard app={app} />
+              </li>
+            ))}
+          </ul>
+        )}
       </main>
     </div>
   );
