@@ -14,10 +14,14 @@ create table if not exists public.apps (
   mcp_server_url text not null default '',
   test_cases jsonb not null default '[]'::jsonb,
   negative_test_cases jsonb not null default '[]'::jsonb,
+  read_only_assessment text not null default '',
+  open_world_assessment text not null default '',
+  destructive_assessment text not null default '',
   github_repo_url text not null default '',
   status text not null default 'draft'
     check (status in ('draft', 'in_review', 'revision_needed')),
   notes text not null default '',
+  release_notes text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

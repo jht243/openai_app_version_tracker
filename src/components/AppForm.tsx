@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldRow } from "./FieldRow";
+import { CopyButton } from "./CopyButton";
 import { cn } from "@/lib/utils";
 
 export type AppFormHandle = {
@@ -200,9 +201,7 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
         </div>
       ) : null}
 
-      {/* App Info Section */}
       <section className="surface p-3 md:p-4">
-        <h3 className="mb-2 text-[13px] font-medium text-muted-foreground">App info</h3>
         <div className="space-y-2">
           <FieldRow label="App Name" value={form.name}>
             <Input
@@ -235,43 +234,68 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
               className={cn(inputClass)}
             />
           </FieldRow>
-          <p className="text-[12px] text-muted-foreground">
-            Website, support, privacy, and terms default from Layer3 for every app
-            (see <code className="rounded bg-muted px-1 text-[11px]">default-app-urls.ts</code>).
-            Edit below only if this app needs different values.
-          </p>
-          <FieldRow label="Website URL" value={form.website_url}>
-            <Input
-              value={form.website_url}
-              readOnly={readOnly}
-              onChange={(e) => set("website_url", e.target.value)}
-              className={cn(inputClass)}
-            />
-          </FieldRow>
-          <FieldRow label="Support URL" value={form.support_url}>
-            <Input
-              value={form.support_url}
-              readOnly={readOnly}
-              onChange={(e) => set("support_url", e.target.value)}
-              className={cn(inputClass)}
-            />
-          </FieldRow>
-          <FieldRow label="Privacy Policy URL" value={form.privacy_url}>
-            <Input
-              value={form.privacy_url}
-              readOnly={readOnly}
-              onChange={(e) => set("privacy_url", e.target.value)}
-              className={cn(inputClass)}
-            />
-          </FieldRow>
-          <FieldRow label="Terms of Service URL" value={form.terms_url}>
-            <Input
-              value={form.terms_url}
-              readOnly={readOnly}
-              onChange={(e) => set("terms_url", e.target.value)}
-              className={cn(inputClass)}
-            />
-          </FieldRow>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-muted-foreground">Website URL</label>
+              <div className="grid grid-cols-[1fr_32px] items-start gap-2">
+                <Input
+                  value={form.website_url}
+                  readOnly={readOnly}
+                  onChange={(e) => set("website_url", e.target.value)}
+                  className={cn(inputClass)}
+                />
+                <div className="pt-1.5">
+                  <CopyButton value={form.website_url} />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-muted-foreground">Support URL</label>
+              <div className="grid grid-cols-[1fr_32px] items-start gap-2">
+                <Input
+                  value={form.support_url}
+                  readOnly={readOnly}
+                  onChange={(e) => set("support_url", e.target.value)}
+                  className={cn(inputClass)}
+                />
+                <div className="pt-1.5">
+                  <CopyButton value={form.support_url} />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-muted-foreground">
+                Privacy Policy URL
+              </label>
+              <div className="grid grid-cols-[1fr_32px] items-start gap-2">
+                <Input
+                  value={form.privacy_url}
+                  readOnly={readOnly}
+                  onChange={(e) => set("privacy_url", e.target.value)}
+                  className={cn(inputClass)}
+                />
+                <div className="pt-1.5">
+                  <CopyButton value={form.privacy_url} />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium text-muted-foreground">
+                Terms of Service URL
+              </label>
+              <div className="grid grid-cols-[1fr_32px] items-start gap-2">
+                <Input
+                  value={form.terms_url}
+                  readOnly={readOnly}
+                  onChange={(e) => set("terms_url", e.target.value)}
+                  className={cn(inputClass)}
+                />
+                <div className="pt-1.5">
+                  <CopyButton value={form.terms_url} />
+                </div>
+              </div>
+            </div>
+          </div>
           <FieldRow label="Demo Recording URL" value={form.demo_recording_url}>
             <Input
               value={form.demo_recording_url}
@@ -295,10 +319,42 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
         </FieldRow>
       </section>
 
-      {/* Testing Section */}
       <section className="surface p-3 md:p-4">
-        <h3 className="mb-2 text-[13px] font-medium text-muted-foreground">Testing</h3>
+        <div className="space-y-2">
+          <FieldRow label="Read Only" value={form.read_only_assessment}>
+            <Textarea
+              value={form.read_only_assessment}
+              readOnly={readOnly}
+              onChange={(e) => set("read_only_assessment", e.target.value)}
+              rows={3}
+              placeholder="Describe why this app is or is not read only..."
+              className={cn(inputClass)}
+            />
+          </FieldRow>
+          <FieldRow label="Open World" value={form.open_world_assessment}>
+            <Textarea
+              value={form.open_world_assessment}
+              readOnly={readOnly}
+              onChange={(e) => set("open_world_assessment", e.target.value)}
+              rows={3}
+              placeholder="Describe whether this app can access open-world content..."
+              className={cn(inputClass)}
+            />
+          </FieldRow>
+          <FieldRow label="Destructive" value={form.destructive_assessment}>
+            <Textarea
+              value={form.destructive_assessment}
+              readOnly={readOnly}
+              onChange={(e) => set("destructive_assessment", e.target.value)}
+              rows={3}
+              placeholder="Describe whether this app can perform destructive actions..."
+              className={cn(inputClass)}
+            />
+          </FieldRow>
+        </div>
+      </section>
 
+      <section className="surface p-3 md:p-4">
         <h4 className="mb-1.5 text-[13px] font-medium text-muted-foreground">
           Positive cases (5)
         </h4>
@@ -409,9 +465,6 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
 
       {/* GitHub & Notes */}
       <section className="surface p-3 md:p-4">
-        <h3 className="mb-2 text-[13px] font-medium text-muted-foreground">
-          GitHub & notes
-        </h3>
         <div className="space-y-2">
           <FieldRow label="GitHub Repo URL" value={form.github_repo_url}>
             <Input
@@ -436,6 +489,19 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
             />
           </div>
         </div>
+      </section>
+
+      <section className="surface p-3 md:p-4">
+        <FieldRow label="Release Notes" value={form.release_notes}>
+          <Textarea
+            value={form.release_notes}
+            readOnly={readOnly}
+            onChange={(e) => set("release_notes", e.target.value)}
+            rows={4}
+            placeholder="Notes about what changed in this release..."
+            className={cn(inputClass)}
+          />
+        </FieldRow>
       </section>
     </div>
   );

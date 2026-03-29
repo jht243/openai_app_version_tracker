@@ -16,6 +16,11 @@ import {
   DEFAULT_TERMS_URL,
   DEFAULT_WEBSITE_URL,
 } from "./default-app-urls";
+import {
+  DEFAULT_DESTRUCTIVE_ASSESSMENT,
+  DEFAULT_OPEN_WORLD_ASSESSMENT,
+  DEFAULT_READ_ONLY_ASSESSMENT,
+} from "./default-policy-assessments";
 import { createSupabaseBrowserClient } from "./supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -91,9 +96,13 @@ function normalizeApp(raw: unknown): App {
     mcp_server_url: String(r.mcp_server_url ?? ""),
     test_cases: ensureTestCases(r.test_cases),
     negative_test_cases: ensureNegativeCases(r.negative_test_cases),
+    read_only_assessment: String(r.read_only_assessment ?? ""),
+    open_world_assessment: String(r.open_world_assessment ?? ""),
+    destructive_assessment: String(r.destructive_assessment ?? ""),
     github_repo_url: String(r.github_repo_url ?? ""),
     status: migrateAppStatus(r.status),
     notes: String(r.notes ?? ""),
+    release_notes: String(r.release_notes ?? ""),
     created_at: String(r.created_at ?? new Date().toISOString()),
     updated_at: String(r.updated_at ?? new Date().toISOString()),
   };
@@ -142,9 +151,13 @@ function appToRow(app: App): Record<string, unknown> {
     mcp_server_url: app.mcp_server_url,
     test_cases: app.test_cases,
     negative_test_cases: app.negative_test_cases,
+    read_only_assessment: app.read_only_assessment,
+    open_world_assessment: app.open_world_assessment,
+    destructive_assessment: app.destructive_assessment,
     github_repo_url: app.github_repo_url,
     status: app.status,
     notes: app.notes,
+    release_notes: app.release_notes,
     created_at: app.created_at,
     updated_at: app.updated_at,
   };
@@ -213,9 +226,16 @@ export async function createApp(
     negative_test_cases:
       data.negative_test_cases ||
       Array.from({ length: 3 }, () => ({ ...EMPTY_NEGATIVE_TEST_CASE })),
+    read_only_assessment:
+      data.read_only_assessment || DEFAULT_READ_ONLY_ASSESSMENT,
+    open_world_assessment:
+      data.open_world_assessment || DEFAULT_OPEN_WORLD_ASSESSMENT,
+    destructive_assessment:
+      data.destructive_assessment || DEFAULT_DESTRUCTIVE_ASSESSMENT,
     github_repo_url: data.github_repo_url || "",
     status: data.status || "draft",
     notes: data.notes || "",
+    release_notes: data.release_notes || "",
     created_at: now,
     updated_at: now,
   };

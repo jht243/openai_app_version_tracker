@@ -32,9 +32,13 @@ export interface App {
   mcp_server_url: string;
   test_cases: TestCase[];
   negative_test_cases: NegativeTestCase[];
+  read_only_assessment: string;
+  open_world_assessment: string;
+  destructive_assessment: string;
   github_repo_url: string;
   status: AppStatus;
   notes: string;
+  release_notes: string;
   created_at: string;
   updated_at: string;
 }
