@@ -34,6 +34,33 @@ function sb(): SupabaseClient {
   return _sb;
 }
 
+const BACKWARD_COMPAT_OPTIONAL_APP_COLUMNS = [
+  "read_only_assessment",
+  "open_world_assessment",
+  "destructive_assessment",
+  "release_notes",
+] as const;
+
+function rowWithoutMissingOptionalColumn(
+  row: Record<string, unknown>,
+  errorMessage: string
+): Record<string, unknown> | null {
+  const m = errorMessage.match(/column\s+"?([a-zA-Z0-9_]+)"?.*does not exist/i);
+  if (!m?.[1]) return null;
+  const col = m[1];
+  if (
+    !BACKWARD_COMPAT_OPTIONAL_APP_COLUMNS.includes(
+      col as (typeof BACKWARD_COMPAT_OPTIONAL_APP_COLUMNS)[number]
+    )
+  ) {
+    return null;
+  }
+  if (!(col in row)) return null;
+  const next = { ...row };
+  delete next[col];
+  return next;
+}
+
 function ensureTestCases(raw: unknown): TestCase[] {
   const arr = Array.isArray(raw) ? raw : [];
   const list = arr.map((t) => ({
@@ -239,16 +266,22 @@ export async function createApp(
     created_at: now,
     updated_at: now,
   };
-  const { data: row, error } = await sb()
-    .from("apps")
-    .insert(appToRow(app))
-    .select()
-    .single();
-  if (error) {
-    console.error("createApp", error);
-    throw new Error(error.message);
+  let rowToInsert = appToRow(app);
+  while (true) {
+    const { data: row, error } = await sb()
+      .from("apps")
+      .insert(rowToInsert)
+      .select()
+      .single();
+    if (!error) return normalizeApp(row);
+
+    const fallback = rowWithoutMissingOptionalColumn(rowToInsert, error.message);
+    if (!fallback) {
+      console.error("createApp", error);
+      throw new Error(error.message);
+    }
+    rowToInsert = fallback;
   }
-  return normalizeApp(row);
 }
 
 export async function updateApp(
@@ -262,17 +295,23 @@ export async function updateApp(
     ...data,
     updated_at: new Date().toISOString(),
   };
-  const { data: row, error } = await sb()
-    .from("apps")
-    .update(appToRow(merged))
-    .eq("id", id)
-    .select()
-    .single();
-  if (error) {
-    console.error("updateApp", error);
-    return undefined;
+  let rowToUpdate = appToRow(merged);
+  while (true) {
+    const { data: row, error } = await sb()
+      .from("apps")
+      .update(rowToUpdate)
+      .eq("id", id)
+      .select()
+      .single();
+    if (!error) return normalizeApp(row);
+
+    const fallback = rowWithoutMissingOptionalColumn(rowToUpdate, error.message);
+    if (!fallback) {
+      console.error("updateApp", error);
+      return undefined;
+    }
+    rowToUpdate = fallback;
   }
-  return normalizeApp(row);
 }
 
 export async function deleteApp(id: string): Promise<boolean> {

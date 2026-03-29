@@ -49,7 +49,9 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
   ref
 ) {
   const [form, setForm] = useState<App>(app);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle"
+  );
   const skipFirstAutosave = useRef(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -119,10 +121,12 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
         const updated = await updateApp(form.id, form);
         if (updated) {
           onUpdateRef.current(updated);
+          setSaveStatus("saved");
+          if (savedClearRef.current) clearTimeout(savedClearRef.current);
+          savedClearRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
+          return;
         }
-        setSaveStatus("saved");
-        if (savedClearRef.current) clearTimeout(savedClearRef.current);
-        savedClearRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
+        setSaveStatus("error");
       })();
     }, AUTOSAVE_MS);
 
@@ -185,6 +189,7 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
             <>
               {saveStatus === "saving" && <span>Saving…</span>}
               {saveStatus === "saved" && <span>Saved</span>}
+              {saveStatus === "error" && <span className="text-destructive">Save failed</span>}
             </>
           )}
         </div>
