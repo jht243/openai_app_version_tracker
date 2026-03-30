@@ -288,14 +288,13 @@ export async function updateApp(
   id: string,
   data: Partial<App>
 ): Promise<App | undefined> {
-  const existing = await getAppById(id);
-  if (!existing) return undefined;
-  const merged: App = {
-    ...existing,
-    ...data,
-    updated_at: new Date().toISOString(),
-  };
-  let rowToUpdate = appToRow(merged);
+  const patch: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined) patch[k] = v;
+  }
+  patch.updated_at = new Date().toISOString();
+
+  let rowToUpdate = patch;
   while (true) {
     const { data: row, error } = await sb()
       .from("apps")

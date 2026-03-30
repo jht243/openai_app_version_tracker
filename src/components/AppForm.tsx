@@ -36,6 +36,72 @@ interface AppFormProps {
 }
 
 const AUTOSAVE_MS = 500;
+const COMMON_PROMPTS: Array<{ label: string; prompt: string }> = [
+  {
+    label: "Text Suppression",
+    prompt: `let's work on "text" supression, which means that no text will follow after the widget is loaded. See the following reference chat, and prior projects, to see how this is done.
+prior projects = (https://github.com/jht243/mortgage-calculator, https://github.com/jht243/rental-property-calculator)
+Reference chat = Text Supression
+Suppress extra text when widget is present
+How to stop the extra text
+Remove or empty the content field when returning a widget, e.g. return content: [] (or omit content entirely) while keeping structuredContent and _meta with the widget resource/outputTemplate.
+Keep openai/resultCanProduceWidget: true and the embedded widget resource in _meta. No other UI or behavior needs to change.
+Summary: The extra text is from widget.responseText returned in content. Removing that will stop ChatGPT from adding text after the widget.
+`,
+  },
+  {
+    label: "5 Use Cases",
+    prompt: `Help me create 5 test case with included “Scenario” “User Prompt” “tool Triggered” and “expected output. There are 5 test cases, start with the more simple scenarios, and when needed, increase to the more complicated scenarios . See attached image for more context. The first scenario should always be just opening the app. Then slowly, one by one, add other inputs which can be hydrated via the prompt. Each new scenario should add just one new hydration input. Simpler is better. keep all 5 as simple as possible while still showing progression
+`,
+  },
+  {
+    label: "Common Rejections",
+    prompt: `Check that this app is not going to be flagged by and of the Common rejection reasons below - One or more of your test cases did not produce correct results.
+Review all test cases carefully and rerun each one. Ensure that outputs match the expected results. Verify that there are no errors in the UI (if applicable) - for example, issues with loading content, images, or other UI issues. Ensure that the returned textual output closely adheres to the user's request, and does not offer extraneous information that is irrelevant to the request, including personal identifiers.
+
+Ensure that all test cases pass on both ChatGPT web and mobile apps. Compare actual outputs to clearly defined expected behavior for each tool and fix any mismatch so results are relevant to the user's input and the app "reliably does what it promises". If required, in your resubmission, modify your test cases and expected responses to be clear and unambiguous. 
+Your app returns user-related data types that are not disclosed in your privacy policy.
+Audit your MCP tool responses in developer mode by running a few realistic example requests and listing every user-related field your app returns (including nested fields and "debug" payloads). Ensure tools return only what's strictly necessary for the user's request and remove any unnecessary PII, telemetry/internal identifiers (e.g., session/trace/request IDs, timestamps, internal account IDs, logs) and/or any auth secrets (tokens/keys/passwords)
+
+You may also consider updating your published privacy policy so it clearly discloses all categories of personal data you collect/process/return and why—if a field isn't truly needed, remove it rather than disclose it.
+
+If a user identifier is truly necessary, make it explicitly requested and clearly tied to the user's intent (not "looked up and echoed" by default)
+One or more of your tool's readOnlyHint annotations do not appear to match the tool's behavior
+It is required to set readOnlyHint for all tools. A tool is not read-only if it can create/update/delete anything, trigger actions (send emails/messages, run jobs, enqueue tasks, write logs, start workflows), or otherwise change state. In those cases set readOnlyHint: false and ensure the justification provided clearly says what that tool can change. Only set readOnlyHint: true for tools that strictly fetch/lookup/list/retrieve data and do not modify anything.
+One or more of your tool's destructiveHint annotations do not appear to match the tool's behavior
+It is required to set destructiveHint for all tools. Review each tool and decide whether it can cause irreversible outcomes (deleting, overwriting, sending messages/transactions you can't undo, revoking access, destructive admin actions, etc.). Any tool that can make destructive actions—even in some modes, via default parameters, or through indirect side effects—set destructiveHint: true. Ensure the justification provided clearly describes what is irreversible and under what conditions, including any safeguards like confirmation steps, dry-run options, or scoping constraints. If the tool does not cause any outcome described above, ensure that destructiveHint: false is explicitly set. 
+One or more of your tool's openWorldHint annotations do not appear to match the tool's behavior
+It is required to set openWorldHint for all tools. Review each tool and determine whether it can write to or change publicly visible internet state (e.g., posting to social media/blogs/forums, sending emails/SMS/messages to external recipients, creating public tickets/issues, publishing pages, pushing code/content to public endpoints, submitting forms to third parties, or otherwise affecting systems outside a private/first-party context). For any tool with these capabilities, set openWorldHint: true. Set openWorldHint: false only for tools that operate entirely within closed/private systems (including internal writes).
+Cross reference with the official docs here: https://developers.openai.com/apps-sdk
+Make sure that the changes you are suggesting are not affecting the core functionality of the app or any of the hydration logic. 
+
+`,
+  },
+  {
+    label: "Release Notes",
+    prompt: `Create one paragraph of release notes for this application. Keep it easy to read, with clean formatting. No bullets. End with “App is suitable for all ages” This should be high level, not very detailed. Do not include anything about pricing or competitors. 
+`,
+  },
+  {
+    label: "Hydration prompt",
+    prompt: `ok now we need to work on hydration, hydration is the logic where we prefill the data based on the user's prompt to chatgpt. (insert example). You can see examples of how we properly structured hydration in other examples ((https://github.com/jht243/mortgage-calculator, https://github.com/jht243/rental-property-calculator, https://github.com/jht243/auto-calculator, https://github.com/jht243/retirement-calculator, https://github.com/jht243/body-health-calculator)). Also check the official documents for hydration directions: https://developers.openai.com/apps-sdk/. Remember that hydration is NOT REQUIRED to open the app. The app should open even if the user has no data. Remember that user can type with typos, different grammar, different cases, so when you are doing hydration you need infer the intent of the user's message and correct for things like poor grammar or typos. 
+`,
+  },
+];
+
+function formatRelativeSavedTime(savedAtIso: string, nowMs: number): string {
+  const savedMs = Date.parse(savedAtIso);
+  if (Number.isNaN(savedMs)) return "Last saved just now";
+  const diffMs = Math.max(0, nowMs - savedMs);
+  const seconds = Math.floor(diffMs / 1000);
+  if (seconds < 60) return "Last saved less than a minute ago";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `Last saved ${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Last saved ${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  return `Last saved ${days} day${days === 1 ? "" : "s"} ago`;
+}
 
 export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
   {
@@ -52,7 +118,10 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
     "idle"
   );
+  const [lastSavedAt, setLastSavedAt] = useState(app.updated_at);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const skipFirstAutosave = useRef(true);
+  const dirtyRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formRef = useRef(form);
@@ -78,6 +147,7 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
 
   const set = useCallback(
     <K extends keyof App>(key: K, value: App[K]) => {
+      dirtyRef.current = true;
       setForm((prev) => ({ ...prev, [key]: value }));
     },
     []
@@ -85,9 +155,16 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
 
   const setTestCase = useCallback(
     (index: number, field: keyof TestCase, value: string) => {
+      dirtyRef.current = true;
       setForm((prev) => {
         const cases = [...prev.test_cases];
-        cases[index] = { ...cases[index], [field]: value };
+        if (field === "tool_triggered" && index === 0) {
+          for (let i = 0; i < cases.length; i++) {
+            cases[i] = { ...cases[i], tool_triggered: value };
+          }
+        } else {
+          cases[index] = { ...cases[index], [field]: value };
+        }
         return { ...prev, test_cases: cases };
       });
     },
@@ -96,6 +173,7 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
 
   const setNegTestCase = useCallback(
     (index: number, field: keyof NegativeTestCase, value: string) => {
+      dirtyRef.current = true;
       setForm((prev) => {
         const cases = [...prev.negative_test_cases];
         cases[index] = { ...cases[index], [field]: value };
@@ -121,6 +199,8 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
         const updated = await updateApp(form.id, form);
         if (updated) {
           onUpdateRef.current(updated);
+          dirtyRef.current = false;
+          setLastSavedAt(updated.updated_at);
           setSaveStatus("saved");
           if (savedClearRef.current) clearTimeout(savedClearRef.current);
           savedClearRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
@@ -137,6 +217,15 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
   }, [form, readOnly]);
 
   useEffect(() => {
+    setLastSavedAt(app.updated_at);
+  }, [app.updated_at]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => setNowMs(Date.now()), 30000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (savedClearRef.current) clearTimeout(savedClearRef.current);
     };
@@ -145,10 +234,14 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
   useEffect(() => {
     if (readOnly) return;
     return () => {
+      if (!dirtyRef.current) return;
       const latest = formRef.current;
       void (async () => {
         const updated = await updateApp(latest.id, latest);
-        if (updated) onUpdateRef.current(updated);
+        if (updated) {
+          dirtyRef.current = false;
+          onUpdateRef.current(updated);
+        }
       })();
     };
   }, [readOnly]);
@@ -186,11 +279,16 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
           {readOnly ? (
             <span>{versionLabel ?? "Locked"}</span>
           ) : (
-            <>
-              {saveStatus === "saving" && <span>Saving…</span>}
-              {saveStatus === "saved" && <span>Saved</span>}
-              {saveStatus === "error" && <span className="text-destructive">Save failed</span>}
-            </>
+            <div className="flex flex-col items-end gap-1 leading-none">
+              <span>{formatRelativeSavedTime(lastSavedAt, nowMs)}</span>
+              <span>
+                {saveStatus === "saving" && "Saving…"}
+                {saveStatus === "saved" && "Saved"}
+                {saveStatus === "error" && (
+                  <span className="text-destructive">Save failed</span>
+                )}
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -507,6 +605,20 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
             className={cn(inputClass)}
           />
         </FieldRow>
+      </section>
+
+      <section className="surface p-3 md:p-4">
+        <h4 className="mb-2 text-[13px] font-medium text-muted-foreground">Common Prompts</h4>
+        <div className="flex flex-wrap gap-2">
+          {COMMON_PROMPTS.map((item) => (
+            <CopyButton
+              key={item.label}
+              value={item.prompt}
+              label={item.label}
+              variant="button"
+            />
+          ))}
+        </div>
       </section>
     </div>
   );
