@@ -40,7 +40,7 @@ const COMMON_PROMPTS: Array<{ label: string; prompt: string }> = [
   {
     label: "Text Suppression",
     prompt: `let's work on "text" supression, which means that no text will follow after the widget is loaded. See the following reference chat, and prior projects, to see how this is done.
-prior projects = (https://github.com/jht243/mortgage-calculator, https://github.com/jht243/rental-property-calculator)
+prior projects = (https://github.com/jonathanpipeline2026/mortgage-calculator, https://github.com/jonathanpipeline2026/rental-property-calculator)
 Reference chat = Text Supression
 Suppress extra text when widget is present
 How to stop the extra text
@@ -84,7 +84,7 @@ Make sure that the changes you are suggesting are not affecting the core functio
   },
   {
     label: "Hydration prompt",
-    prompt: `ok now we need to work on hydration, hydration is the logic where we prefill the data based on the user's prompt to chatgpt. (insert example). You can see examples of how we properly structured hydration in other examples ((https://github.com/jht243/mortgage-calculator, https://github.com/jht243/rental-property-calculator, https://github.com/jht243/auto-calculator, https://github.com/jht243/retirement-calculator, https://github.com/jht243/body-health-calculator)). Also check the official documents for hydration directions: https://developers.openai.com/apps-sdk/. Remember that hydration is NOT REQUIRED to open the app. The app should open even if the user has no data. Remember that user can type with typos, different grammar, different cases, so when you are doing hydration you need infer the intent of the user's message and correct for things like poor grammar or typos. 
+    prompt: `ok now we need to work on hydration, hydration is the logic where we prefill the data based on the user's prompt to chatgpt. (insert example). You can see examples of how we properly structured hydration in other examples ((https://github.com/jonathanpipeline2026/mortgage-calculator, https://github.com/jonathanpipeline2026/rental-property-calculator, https://github.com/jonathanpipeline2026/auto-calculator, https://github.com/jonathanpipeline2026/retirement-calculator, https://github.com/jonathanpipeline2026/body-health-calculator)). Also check the official documents for hydration directions: https://developers.openai.com/apps-sdk/. Remember that hydration is NOT REQUIRED to open the app. The app should open even if the user has no data. Remember that user can type with typos, different grammar, different cases, so when you are doing hydration you need infer the intent of the user's message and correct for things like poor grammar or typos. 
 `,
   },
 ];
