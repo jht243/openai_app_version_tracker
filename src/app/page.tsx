@@ -51,6 +51,7 @@ export default function Dashboard() {
   const revisionNeededCount = apps.filter(
     (a) => a.status === "revision_needed"
   ).length;
+  const liveCount = apps.filter((a) => a.status === "live").length;
 
   const filterItems: { key: AppStatus | "all"; label: string; count?: number }[] =
     [
@@ -76,7 +77,7 @@ export default function Dashboard() {
                 <>
                   {" "}
                   · {inReviewCount} in review · {revisionNeededCount} revision
-                  needed
+                  needed · {liveCount} live
                 </>
               )}
             </p>

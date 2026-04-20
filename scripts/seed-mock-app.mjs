@@ -68,7 +68,7 @@ const row = {
   mcp_server_url: "",
   test_cases: Array.from({ length: 5 }, () => ({ ...EMPTY_TEST_CASE })),
   negative_test_cases: Array.from({ length: 3 }, () => ({ ...EMPTY_NEGATIVE })),
-  github_repo_url: "https://github.com/jonathanpipeline2026/openai_apps_version_control",
+  github_repo_url: "https://github.com/jht243/openai_app_version_tracker",
   status: "draft",
   notes: "Seeded mock app",
   created_at: now,

@@ -1,5 +1,5 @@
 /** App lifecycle in the tracker (store submission flow). */
-export type AppStatus = "draft" | "in_review" | "revision_needed";
+export type AppStatus = "draft" | "in_review" | "revision_needed" | "live";
 
 export type VersionOutcome =
   | "pending"
@@ -77,6 +77,7 @@ export const STATUS_CONFIG: Record<
   draft: { label: "Draft", color: "bg-gray-500" },
   in_review: { label: "In Review", color: "bg-yellow-500" },
   revision_needed: { label: "Revision Needed", color: "bg-orange-500" },
+  live: { label: "Live", color: "bg-green-500" },
 };
 
 export const OUTCOME_CONFIG: Record<

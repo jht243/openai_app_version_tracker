@@ -11,6 +11,7 @@ const PIPELINE_ORDER: AppStatus[] = [
   "draft",
   "in_review",
   "revision_needed",
+  "live",
 ];
 
 export function PipelineView({ apps }: PipelineViewProps) {
@@ -21,7 +22,7 @@ export function PipelineView({ apps }: PipelineViewProps) {
   }));
 
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {columns.map((col) => (
         <div
           key={col.status}

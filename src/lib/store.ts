@@ -88,6 +88,7 @@ function migrateAppStatus(raw: unknown): AppStatus {
   if (s === "draft") return "draft";
   if (s === "in_review") return "in_review";
   if (s === "revision_needed") return "revision_needed";
+  if (s === "live") return "live";
   if (s === "submitted") return "in_review";
   if (s === "rejected") return "revision_needed";
   if (s === "approved") return "draft";
