@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const COOKIE_NAME = "app_tracker_auth";
 const TOKEN_PREFIX = "authenticated:";
-const PUBLIC_PATHS = ["/login", "/api/auth"];
+const PUBLIC_PATHS = ["/login", "/api/auth", "/api/ingest"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
