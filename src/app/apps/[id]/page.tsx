@@ -233,6 +233,18 @@ export default function AppDetailPage() {
                 Log feedback
               </Button>
             )}
+            {app.live_app_url && (
+              <a
+                href={app.live_app_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="h-9 gap-2 rounded-md px-3">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Open app
+                </Button>
+              </a>
+            )}
             {app.github_repo_url && (
               <a
                 href={app.github_repo_url}

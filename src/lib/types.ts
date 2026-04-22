@@ -36,6 +36,8 @@ export interface App {
   open_world_assessment: string;
   destructive_assessment: string;
   github_repo_url: string;
+  /** Public URL where a live app is reachable (e.g. https://chatgpt.com/apps/...). */
+  live_app_url: string;
   status: AppStatus;
   notes: string;
   release_notes: string;

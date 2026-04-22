@@ -578,6 +578,15 @@ export const AppForm = forwardRef<AppFormHandle, AppFormProps>(function AppForm(
               className={cn(inputClass)}
             />
           </FieldRow>
+          <FieldRow label="Live app URL" value={form.live_app_url}>
+            <Input
+              value={form.live_app_url}
+              readOnly={readOnly}
+              onChange={(e) => set("live_app_url", e.target.value)}
+              placeholder="https://chatgpt.com/apps/your-app--slug/asdk_app_…"
+              className={cn(inputClass)}
+            />
+          </FieldRow>
           <div className="grid grid-cols-[180px_1fr] gap-2 md:gap-3">
             <label className="text-[13px] font-medium text-muted-foreground pt-1.5">
               Internal Notes

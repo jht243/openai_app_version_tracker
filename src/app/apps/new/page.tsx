@@ -56,6 +56,7 @@ export default function NewAppPage() {
   const [demoRecordingUrl, setDemoRecordingUrl] = useState("");
   const [mcpServerUrl, setMcpServerUrl] = useState("");
   const [githubRepoUrl, setGithubRepoUrl] = useState("");
+  const [liveAppUrl, setLiveAppUrl] = useState("");
   const [creating, setCreating] = useState(false);
 
   const handleCreate = async () => {
@@ -69,6 +70,7 @@ export default function NewAppPage() {
         demo_recording_url: demoRecordingUrl,
         mcp_server_url: mcpServerUrl,
         github_repo_url: githubRepoUrl,
+        live_app_url: liveAppUrl,
       });
       router.push(`/apps/${app.id}`);
     } finally {
@@ -178,6 +180,20 @@ export default function NewAppPage() {
                   type="url"
                   className="h-9"
                 />
+              </div>
+
+              <div>
+                <FieldLabel>Live app URL</FieldLabel>
+                <Input
+                  value={liveAppUrl}
+                  onChange={(e) => setLiveAppUrl(e.target.value)}
+                  placeholder="https://chatgpt.com/apps/your-app--slug/asdk_app_…"
+                  type="url"
+                  className="h-9"
+                />
+                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
+                  The exact URL where this app is reachable once it goes live.
+                </p>
               </div>
             </FormSection>
 

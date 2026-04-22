@@ -39,6 +39,7 @@ const BACKWARD_COMPAT_OPTIONAL_APP_COLUMNS = [
   "open_world_assessment",
   "destructive_assessment",
   "release_notes",
+  "live_app_url",
 ] as const;
 
 function rowWithoutMissingOptionalColumn(
@@ -128,6 +129,7 @@ function normalizeApp(raw: unknown): App {
     open_world_assessment: String(r.open_world_assessment ?? ""),
     destructive_assessment: String(r.destructive_assessment ?? ""),
     github_repo_url: String(r.github_repo_url ?? ""),
+    live_app_url: String(r.live_app_url ?? ""),
     status: migrateAppStatus(r.status),
     notes: String(r.notes ?? ""),
     release_notes: String(r.release_notes ?? ""),
@@ -183,6 +185,7 @@ function appToRow(app: App): Record<string, unknown> {
     open_world_assessment: app.open_world_assessment,
     destructive_assessment: app.destructive_assessment,
     github_repo_url: app.github_repo_url,
+    live_app_url: app.live_app_url,
     status: app.status,
     notes: app.notes,
     release_notes: app.release_notes,
@@ -261,6 +264,7 @@ export async function createApp(
     destructive_assessment:
       data.destructive_assessment || DEFAULT_DESTRUCTIVE_ASSESSMENT,
     github_repo_url: data.github_repo_url || "",
+    live_app_url: data.live_app_url || "",
     status: data.status || "draft",
     notes: data.notes || "",
     release_notes: data.release_notes || "",
